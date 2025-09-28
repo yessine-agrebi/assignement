@@ -1,17 +1,15 @@
-import { CategoryRow, CategoryDto, ParentCategoryDto, SubcategoryDto, CategoryContentDto } from './category.types';
+import { CategoryContent, CategoryRow } from './types/category-row.type';
+import { Category, Subcategory } from './types/category.types';
 
 export class CategoryMapper {
-  /**
-   * Transforms flat CategoryRow data into a hierarchical CategoryDto array.
-   */
-  public static mapRawRowsToHierarchicalDto(rawRows: CategoryRow[]): CategoryDto[] {
-    const categoriesMap = new Map<string, CategoryDto>();
+  public static mapRawRowsToHierarchicalDto(
+    rawRows: CategoryRow[],
+  ): Category[] {
+    const categoriesMap = new Map<string, Category>();
 
     for (const row of rawRows) {
-      // 1. Get or initialize the main Category
       const category = this.getOrCreateCategory(categoriesMap, row);
 
-      // 2. Add Category's Content/Translation
       this.addContent(category.contents, {
         id: row.categoryContentId,
         name: row.name,
@@ -20,19 +18,18 @@ export class CategoryMapper {
         language: row.language,
       });
 
-      // 3. Add Parent Category details
       this.addParentDetails(category, row);
 
-      // 4. Add Subcategory details
       this.addSubcategoryDetails(category, row);
     }
 
     return Array.from(categoriesMap.values());
   }
 
-  // --- Helper Methods for Clarity and Reusability ---
-
-  private static getOrCreateCategory(map: Map<string, CategoryDto>, row: CategoryRow): CategoryDto {
+  private static getOrCreateCategory(
+    map: Map<string, Category>,
+    row: CategoryRow,
+  ): Category {
     if (!map.has(row.id)) {
       map.set(row.id, {
         id: row.id,
@@ -46,13 +43,16 @@ export class CategoryMapper {
     return map.get(row.id)!;
   }
 
-  private static addContent(contents: CategoryContentDto[], contentData: any): void {
-    if (contentData.id && !contents.some(c => c.id === contentData.id)) {
+  private static addContent(
+    contents: CategoryContent[],
+    contentData: CategoryContent,
+  ): void {
+    if (contentData.id && !contents.some((c) => c.id === contentData.id)) {
       contents.push(contentData);
     }
   }
 
-  private static addParentDetails(category: CategoryDto, row: CategoryRow): void {
+  private static addParentDetails(category: Category, row: CategoryRow): void {
     if (row.parentId) {
       if (!category.parent) {
         category.parent = {
@@ -60,7 +60,9 @@ export class CategoryMapper {
           image: row.parentImage!,
           displayOrder: row.parentDisplayOrder!,
           contents: [],
-        } as ParentCategoryDto;
+          parent: null,
+          subcategories: [],
+        } as Category;
       }
       this.addContent(category.parent.contents, {
         id: row.parentContentId,
@@ -72,9 +74,14 @@ export class CategoryMapper {
     }
   }
 
-  private static addSubcategoryDetails(category: CategoryDto, row: CategoryRow): void {
+  private static addSubcategoryDetails(
+    category: Category,
+    row: CategoryRow,
+  ): void {
     if (row.subcategoryId) {
-      let subcategory = category.subcategories.find(sub => sub.id === row.subcategoryId);
+      let subcategory = category.subcategories.find(
+        (sub) => sub.id === row.subcategoryId,
+      );
 
       if (!subcategory) {
         subcategory = {
@@ -82,7 +89,7 @@ export class CategoryMapper {
           image: row.subcategoryImage!,
           displayOrder: row.subcategoryDisplayOrder!,
           contents: [],
-        } as SubcategoryDto;
+        } as Subcategory;
         category.subcategories.push(subcategory);
       }
 

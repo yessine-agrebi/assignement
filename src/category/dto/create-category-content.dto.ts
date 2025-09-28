@@ -1,8 +1,8 @@
-import { Language } from "generated/prisma";
+import { Language } from 'generated/prisma';
 
 export class CreateCategoryContentDto {
-    name: string;
-    slug: string;
-    description?: string;
-    language: Language;
+  name: string;
+  slug: string;
+  description?: string;
+  language: Language;
 }

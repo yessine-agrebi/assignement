@@ -1,4 +1,3 @@
-
 export const CATEGORY_PARENT_SUBCATEGORIES_QUERY = `
       SELECT
   c.id,
@@ -43,7 +42,7 @@ LEFT JOIN "CategoryContent" pc ON pc."categoryId" = p.id
 LEFT JOIN "Category" sc ON sc."parentCategoryId" = c.id
 LEFT JOIN "CategoryContent" scc ON scc."categoryId" = sc.id
 
-WHERE c."parentCategoryId" IS NULL
+-- WHERE c."parentCategoryId" IS NULL
 ORDER BY c."displayOrder", sc."displayOrder";
 
 `;

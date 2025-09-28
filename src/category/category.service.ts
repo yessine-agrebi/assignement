@@ -3,8 +3,9 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CATEGORY_PARENT_SUBCATEGORIES_QUERY } from 'src/lib/queries';
-import { CategoryDto, CategoryRow } from './category.types';
 import { CategoryMapper } from './category.mapper';
+import { Category } from './types/category.types';
+import { CategoryRow } from './types/category-row.type';
 
 @Injectable()
 export class CategoryService {
@@ -23,7 +24,7 @@ export class CategoryService {
     });
   }
 
-  async findAll(): Promise<CategoryDto[]> {
+  async findAll(): Promise<Category[]> {
     const rawRows = await this.prisma.$queryRawUnsafe<CategoryRow[]>(
       CATEGORY_PARENT_SUBCATEGORIES_QUERY,
     );
@@ -31,15 +32,63 @@ export class CategoryService {
     return CategoryMapper.mapRawRowsToHierarchicalDto(rawRows);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findOne(id: string) {
+    return await this.prisma.category.findUnique({
+      where: { id },
+      include: { contents: true },
+    });
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(updateCategoryDto: UpdateCategoryDto) {
+    const { id, contents, ...rest } = updateCategoryDto;
+
+    return this.prisma.$transaction(async (tx) => {
+      const category = await tx.category.update({
+        where: { id },
+        data: {
+          ...rest,
+        },
+      });
+
+      if (contents && contents.length > 0) {
+        for (const content of contents) {
+          await tx.categoryContent.upsert({
+            where: {
+              slug_language: {
+                slug: content.slug,
+                language: content.language,
+              },
+            },
+            update: {
+              name: content.name,
+              slug: content.slug,
+              description: content.description,
+            },
+            create: {
+              categoryId: id,
+              name: content.name,
+              slug: content.slug,
+              description: content.description,
+              language: content.language,
+            },
+          });
+        }
+      }
+
+      return category;
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(id: string) {
+    return this.prisma.$transaction(async (tx) => {
+      await tx.category.updateMany({
+        where: { parentCategoryId: id },
+        data: { parentCategoryId: null },
+      });
+
+      return tx.category.delete({
+        where: { id },
+      });
+    });
   }
 }

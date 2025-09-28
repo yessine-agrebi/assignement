@@ -1,4 +1,4 @@
-import { CreateCategoryContentDto } from "./create-category-content.dto";
+import { CreateCategoryContentDto } from './create-category-content.dto';
 
 export class CreateCategoryDto {
   parentCategoryId?: string;

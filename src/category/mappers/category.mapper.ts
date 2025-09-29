@@ -1,8 +1,8 @@
-import { CategoryContent, CategoryRow } from './types/category-row.type';
-import { Category, Subcategory } from './types/category.types';
+import { CategoryContent, CategoryRow } from '../types/category-row.type';
+import { Category, Subcategory } from '../types/category.types';
 
 export class CategoryMapper {
-  public static mapRawRowsToHierarchicalDto(
+  public static mapCategoryRowsToHierarchicalDto(
     rawRows: CategoryRow[],
   ): Category[] {
     const categoriesMap = new Map<string, Category>();

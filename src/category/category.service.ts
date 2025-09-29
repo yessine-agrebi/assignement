@@ -3,9 +3,9 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CATEGORY_PARENT_SUBCATEGORIES_QUERY } from 'src/lib/queries';
-import { CategoryMapper } from './category.mapper';
 import { Category } from './types/category.types';
 import { CategoryRow } from './types/category-row.type';
+import { CategoryMapper } from './mappers/category.mapper';
 
 @Injectable()
 export class CategoryService {
@@ -25,11 +25,11 @@ export class CategoryService {
   }
 
   async findAll(): Promise<Category[]> {
-    const rawRows = await this.prisma.$queryRawUnsafe<CategoryRow[]>(
+    const categoryRows = await this.prisma.$queryRawUnsafe<CategoryRow[]>(
       CATEGORY_PARENT_SUBCATEGORIES_QUERY,
     );
 
-    return CategoryMapper.mapRawRowsToHierarchicalDto(rawRows);
+    return CategoryMapper.mapCategoryRowsToHierarchicalDto(categoryRows);
   }
 
   async findOne(id: string) {

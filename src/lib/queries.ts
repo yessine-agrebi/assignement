@@ -46,3 +46,40 @@ LEFT JOIN "CategoryContent" scc ON scc."categoryId" = sc.id
 ORDER BY c."displayOrder", sc."displayOrder";
 
 `;
+
+export const PRODUCT_QUERY = `SELECT
+  p."id",
+  p."displayOrder",
+  p."createdAt",
+  p."updatedAt",
+  pc."id"                AS "productContentId",
+  pc."name",
+  pc."slug",
+  pc."description",
+  pc."details",
+  pc."language",
+
+  c."id"                 AS "categoryId",
+  c."image"              AS "categoryImage",
+  c."displayOrder"       AS "categoryDisplayOrder",
+
+  cc."id"                AS "categoryContentId",
+  cc."name"              AS "categoryName",
+  cc."slug"              AS "categorySlug",
+  cc."description"       AS "categoryDescription",
+  cc."language"          AS "categoryLanguage"
+
+FROM "Product" p
+LEFT JOIN "ProductContent" pc
+  ON p."id" = pc."productId"
+
+LEFT JOIN "ProductOnCategory" poc
+  ON p."id" = poc."productId"
+
+LEFT JOIN "Category" c
+  ON poc."categoryId" = c."id"
+
+LEFT JOIN "CategoryContent" cc
+  ON c."id" = cc."categoryId"
+ORDER BY p."createdAt" DESC;
+`;

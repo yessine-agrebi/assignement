@@ -35,19 +35,76 @@ export class ProductService {
     const productRows =
       await this.prisma.$queryRawUnsafe<ProductRow[]>(PRODUCT_QUERY);
     const products = ProductMapper.mapProductRowsToDto(productRows);
-    console.log(products[0].categories.length);
     return products;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: string) {
+    return await this.prisma.product.findUnique({
+      where: { id },
+      include: { contents: true, categories: {
+        include: { category: { include: { contents: true } } },
+      } },
+    })
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(updateProductDto: UpdateProductDto) {
+    return await this.prisma.$transaction(async (tx) => {
+      const { id, contents, categoriesIds, ...rest } = updateProductDto;
+
+      const product = await tx.product.update({
+        where: { id },
+        data: {
+          ...rest,
+        },
+      });
+      if (contents && contents.length > 0) {
+        for (const content of contents) {
+          await tx.productContent.upsert({
+            where: {
+              slug_language: {
+                slug: content.slug,
+                language: content.language,
+              },
+            },
+            update: {
+              name: content.name,
+              slug: content.slug,
+              description: content.description,
+              details: content.details || undefined,
+            },
+            create: {
+              productId: id,
+              name: content.name,
+              slug: content.slug,
+              description: content.description || undefined,
+              details: content.details || undefined,
+              language: content.language,
+            }
+          });
+        }
+      }
+
+      if (categoriesIds && categoriesIds.length > 0) {
+        await tx.productOnCategory.deleteMany({
+          where: { productId: id },
+        });
+        for (const categoryId of categoriesIds) {
+          await tx.productOnCategory.create({
+            data: {
+              productId: id,
+              categoryId: categoryId,
+            },
+          });
+        }
+      }
+
+      return product;
+    })
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+  async remove(id: string) {
+    return this.prisma.product.delete({
+      where: { id },
+    });
   }
 }

@@ -1,7 +1,7 @@
-import { CreateCategoryContentDto } from "src/category/dto/create-category-content.dto";
+import { CreateProductContentDto } from "./create-product-content.dto";
 
 export class CreateProductDto {
     displayOrder: number;
     categoriesIds: string[];
-    contents: CreateCategoryContentDto[];
+    contents: CreateProductContentDto[];
 }

@@ -1,27 +1,43 @@
+import { Currency, Language } from "generated/prisma";
+
 export interface ProductRow {
-  // Product
   id: string;
   displayOrder: number;
   createdAt: Date;
   updatedAt: Date;
 
-  // ProductContent
-  productContentId: string | null;
-  name: string | null;
-  slug: string | null;
-  description: string | null;
-  details: string | null;
-  language: string | null;
+  productContentId?: string;
+  name?: string;
+  slug?: string;
+  description?: string;
+  details?: string;
+  language?: Language;
 
-  // Category
-  categoryId: string | null;
-  categoryImage: string | null;
-  categoryDisplayOrder: number | null;
+  categoryId?: string;
+  categoryImage?: string;
+  categoryDisplayOrder?: number;
+  categoryContentId?: string;
+  categoryName?: string;
+  categorySlug?: string;
+  categoryDescription?: string;
+  categoryLanguage?: string;
 
-  // CategoryContent
-  categoryContentId: string | null;
-  categoryName: string | null;
-  categorySlug: string | null;
-  categoryDescription: string | null;
-  categoryLanguage: string | null;
+  productItemId?: string;
+  barcode?: string;
+  reference?: string;
+  productItemImage?: string;
+  online?: boolean;
+  quantity?: number;
+  productItemCreatedAt?: Date;
+  productItemUpdatedAt?: Date;
+
+  productItemPriceId?: string;
+  price?: number;
+  currency?: Currency;
+
+  productItemVariationId?: string;
+  variationContentId?: string;
+  variationName?: string;
+  variationValue?: string;
+  variationLanguage?: Language;
 }

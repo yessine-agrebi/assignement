@@ -1,39 +1,39 @@
 import { Currency, Language } from 'generated/prisma';
 
-export interface ProductItemPriceDto {
+export interface ProductItemPrice {
   id: string;
   price: number | null;
   currency: Currency;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-export interface ProductItemVariationContentDto {
+export interface ProductItemVariationContent {
   id: string;
   name: string;
   value: string;
   language: Language;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-export interface ProductItemVariationDto {
+export interface ProductItemVariation {
   id: string;
-  contents: ProductItemVariationContentDto[];
-  createdAt: Date;
-  updatedAt: Date;
+  contents: ProductItemVariationContent[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-export interface ProductItemDto {
+export interface ProductItem {
   id: string;
   barcode: string;
   reference?: string | null;
   image?: string | null;
   online: boolean;
   quantity: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 
-  prices: ProductItemPriceDto[];
-  variations: ProductItemVariationDto[];
+  prices: ProductItemPrice[];
+  variations: ProductItemVariation[];
 }

@@ -1,4 +1,5 @@
 import { Category } from 'src/category/types/category.types';
+import { ProductItem } from 'src/product-item/types/product-item.types';
 
 export interface ProductContent {
   id: string;
@@ -16,4 +17,5 @@ export interface Product {
   updatedAt: Date;
   contents: ProductContent[];
   categories: Category[];
+  items?: ProductItem[]
 }

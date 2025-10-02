@@ -47,13 +47,13 @@ npx prisma db push
 ```bash
 npx prisma generate
 ```
-### 6. Seef The Database
+### 6. Seed The Database
 
 ```bash
 npx prisma db seed
 ```
 
-### 6. Run the application
+### 7. Run the application
 
 ```bash
 npm run start:dev

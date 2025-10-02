@@ -23,7 +23,7 @@ export class CategoryService {
     });
   }
 
-  async findAll(): Promise<Category[]> {
+  async findAll(limit: number = 10, offset: number = 0): Promise<Category[]> {
     const query = `
       SELECT
   c.id,
@@ -69,11 +69,15 @@ LEFT JOIN "Category" sc ON sc."parentCategoryId" = c.id
 LEFT JOIN "CategoryContent" scc ON scc."categoryId" = sc.id
 
 -- WHERE c."parentCategoryId" IS NULL
-ORDER BY c."displayOrder", sc."displayOrder";
+ORDER BY c."displayOrder", sc."displayOrder"
+LIMIT $1 OFFSET $2;
 
 `;
-    const categoryRows =
-      await this.prisma.$queryRawUnsafe<CategoryRow[]>(query);
+    const categoryRows = await this.prisma.$queryRawUnsafe<CategoryRow[]>(
+      query,
+      limit,
+      offset,
+    );
 
     return CategoryMapper.mapCategoryRowsToHierarchicalDto(categoryRows);
   }

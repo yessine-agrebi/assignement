@@ -6,6 +6,8 @@ import {
   Param,
   Delete,
   Put,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -21,8 +23,11 @@ export class CategoryController {
   }
 
   @Get()
-  findAll() {
-    return this.categoryService.findAll();
+  findAll(
+    @Query('limit', ParseIntPipe) limit?: number,
+    @Query('offset', ParseIntPipe) offset?: number,
+  ) {
+    return this.categoryService.findAll(limit, offset);
   }
 
   @Get(':id')

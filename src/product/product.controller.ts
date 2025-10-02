@@ -3,15 +3,17 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Put,
   Query,
+  ParseIntPipe,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { OptionalParseFloatPipe } from 'src/pipes/optional-parse-float.pipe';
 
 @Controller('products')
 export class ProductController {
@@ -26,10 +28,23 @@ export class ProductController {
   findAll(
     @Query('name') name?: string,
     @Query('description') description?: string,
-    @Query('minPrice') minPrice?: number,
-    @Query('maxPrice') maxPrice?: number,
+    @Query('minPrice', OptionalParseFloatPipe)
+    minPrice?: number,
+    @Query('maxPrice', OptionalParseFloatPipe)
+    maxPrice?: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
+    @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset?: number,
   ) {
-    return this.productService.findAll({ name, description, minPrice, maxPrice });
+    return this.productService.findAll(
+      {
+        name,
+        description,
+        minPrice,
+        maxPrice,
+      },
+      limit,
+      offset,
+    );
   }
 
   @Get(':id')

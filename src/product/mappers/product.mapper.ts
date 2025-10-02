@@ -13,7 +13,6 @@ export class ProductMapper {
     for (const row of productRows) {
       const product = this.getOrCreateProduct(productsMap, row);
 
-      // ----- Product contents -----
       this.addContent(product.contents, {
         id: row.productContentId!,
         name: row.name!,
@@ -23,7 +22,6 @@ export class ProductMapper {
         language: row.language!,
       });
 
-      // ----- Categories -----
       if (row.categoryId && row.categoryContentId) {
         let category = product.categories.find((c) => c.id === row.categoryId);
 
@@ -48,7 +46,6 @@ export class ProductMapper {
         });
       }
 
-      // ----- Product Items -----
       if (row.productItemId) {
         let item = product?.items?.find((i) => i.id === row.productItemId);
 
@@ -68,7 +65,6 @@ export class ProductMapper {
           product?.items?.push(item);
         }
 
-        // Prices
         if (row.productItemPriceId) {
           this.addPrice(item.prices, {
             id: row.productItemPriceId!,
@@ -77,7 +73,6 @@ export class ProductMapper {
           });
         }
 
-        // Variations + contents
         if (row.productItemVariationId) {
           let variation = item.variations.find(
             (v) => v.id === row.productItemVariationId,
@@ -106,7 +101,6 @@ export class ProductMapper {
     return Array.from(productsMap.values());
   }
 
-  // ---------------- Helpers ----------------
 
   private static getOrCreateProduct(
     map: Map<string, Product>,

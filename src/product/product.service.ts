@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ProductRow } from './types/product-row.type';
 import { ProductMapper } from './mappers/product.mapper';
 import { Product } from './types/product.types';
+import { Prisma } from 'generated/prisma';
 
 @Injectable()
 export class ProductService {
@@ -30,45 +31,44 @@ export class ProductService {
     return product;
   }
 
-  async findAll(filters?: {
-    name?: string;
-    description?: string;
-    minPrice?: number;
-    maxPrice?: number;
-  }): Promise<Product[]> {
-    const whereClauses: string[] = [];
+  async findAll(
+    filters?: {
+      name?: string;
+      description?: string;
+      minPrice?: number;
+      maxPrice?: number;
+    },
+    limit: number = 10,
+    offset: number = 0,
+  ): Promise<Product[]> {
+    const whereClauses: Prisma.Sql[] = [];
 
-    let params: any[] = [];
-
-if (filters?.name) {
-  params.push(`%${filters.name}%`);
-  whereClauses.push(`pc."name" ILIKE $${params.length}`);
-}
-
-if (filters?.description) {
-  params.push(`%${filters.description}%`);
-  whereClauses.push(`pc."description" ILIKE $${params.length}`);
-}
-
-if (filters?.minPrice) {
-    const minPrice = Number(filters.minPrice);
-    if (!isNaN(minPrice)) {
-      params.push(minPrice);
-      whereClauses.push(`pip."price" >= $${params.length}`);
+    if (filters?.name) {
+      whereClauses.push(
+        Prisma.sql`pc."name" ILIKE ${'%' + filters.name + '%'}`,
+      );
     }
-  }
 
-  if (filters?.maxPrice) {
-    const maxPrice = Number(filters.maxPrice);
-    if (!isNaN(maxPrice)) {
-      params.push(maxPrice);
-      whereClauses.push(`pip."price" <= $${params.length}`);
+    if (filters?.description) {
+      whereClauses.push(
+        Prisma.sql`pc."description" ILIKE ${'%' + filters.description + '%'}`,
+      );
     }
-  }
 
-const whereSql = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : '';
+    if (filters?.minPrice !== undefined) {
+      whereClauses.push(Prisma.sql`pip."price" >= ${filters.minPrice}`);
+    }
 
-    const query = `SELECT
+    if (filters?.maxPrice !== undefined) {
+      whereClauses.push(Prisma.sql`pip."price" <= ${filters.maxPrice}`);
+    }
+
+    const whereSql =
+      whereClauses.length > 0
+        ? Prisma.sql`WHERE ${Prisma.join(whereClauses, ' AND ')}`
+        : Prisma.empty;
+
+    const query = Prisma.sql`SELECT
   p."id",
   p."displayOrder",
   p."createdAt",
@@ -135,11 +135,11 @@ LEFT JOIN "ProductItemVariation" piv
 LEFT JOIN "ProductItemVariationContent" pivc
   ON piv."id" = pivc."productItemVariationId"
 ${whereSql}
-ORDER BY p."createdAt" DESC;
-
+    ORDER BY p."createdAt" DESC
+    LIMIT ${limit} OFFSET ${offset};
 `;
 
-    const productRows = await this.prisma.$queryRawUnsafe<ProductRow[]>(query, ...params);
+    const productRows = await this.prisma.$queryRaw<ProductRow[]>(query);
     const products = ProductMapper.mapProductRowsToDto(productRows);
     return products;
   }
